@@ -1,6 +1,6 @@
 <?php include_once 'header2.php';?>
 <h1 class="head">All Products</h1>
-<div><a class="nav-link"  href="#">Add User</a></div>
+<div class="addProduct" ><a  style="float:right;margin-right:30px;font-size:20px" href="AddProduct.php">Add Product</a></div>
 <div class="containerr">
 	
 	<div class="table">

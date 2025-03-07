@@ -153,13 +153,13 @@ sup {
 }
 
 a {
-  color: black;
+  color: #007bff;
   text-decoration: none;
   background-color: transparent;
 }
 
 a:hover {
-  color: orange;
+  color: #0056b3;
   text-decoration: underline;
 }
 
@@ -4068,7 +4068,7 @@ input[type="button"].btn-block {
 
 .nav-link:hover, .nav-link:focus {
   text-decoration: none;
-  color: yellow;
+  color: #ffbe44;
 }
 
 .nav-link.disabled {
