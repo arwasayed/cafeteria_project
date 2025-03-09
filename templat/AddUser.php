@@ -2,7 +2,7 @@
 
 <h1 class="text-center mb-4">Add User</h1>
 
-<form action="index.php" method="post" class="form1 text-center row g-3 needs-validation" id="signupForm" novalidate>
+<form  method="post" class="form1 text-center row g-3 needs-validation" id="signupForm" novalidate>
     <table class="product custom-table text-center">
         <tr>
             <th><label for="name">User Name</label></th>
