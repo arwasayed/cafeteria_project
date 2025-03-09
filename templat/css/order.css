@@ -78,3 +78,14 @@
     padding: 10px;
     box-sizing: border-box;
   }
+.checks_section {
+  padding: 60px 0;
+}
+
+.table-responsive {
+  margin-bottom: 30px;
+}
+
+.orders, .order-details {
+  margin-top: 10px;
+}
