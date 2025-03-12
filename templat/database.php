@@ -1,8 +1,15 @@
 <?php
+require_once 'config.php';
+
 class Database {
     private $pdo;
 
-    public function __construct($host, $user, $pass, $dbname) {
+    public function __construct(DatabaseConfig $config) {
+        $host = $config->getHost();
+        $user = $config->getUser();
+        $pass = $config->getPass();
+        $dbname = $config->getDbName();
+
         try {
             $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
             $this->pdo = new PDO($dsn, $user, $pass, [
@@ -14,9 +21,15 @@ class Database {
         }
     }
 
-    
     public function getConnection() {
         return $this->pdo;
+    }
+
+
+
+
+    public function closeConnection() {
+        $this->pdo = null;
     }
 
     public function insert($table, $columns, $values) {
@@ -24,7 +37,8 @@ class Database {
         $placeholders = implode(", ", array_fill(0, count($values), "?"));
         $sql = "INSERT INTO $table ($colNames) VALUES ($placeholders)";
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($values);
+        $stmt->execute($values);
+        return $this->pdo->lastInsertId();
     }
 
     public function selectAll($table) {
@@ -43,17 +57,25 @@ class Database {
         return $stmt->fetchAll();
     }
 
+    public function selectOne($table, $columns, $condition = "", $params = []) {
+        $result = $this->select($table, $columns, $condition, $params);
+        return $result ? $result[0] : null;
+    }
+
     public function update($table, $columns, $values, $condition) {
         $setClause = implode(" = ?, ", $columns) . " = ?";
         $sql = "UPDATE $table SET $setClause WHERE $condition";
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($values);
+        $stmt->execute($values);
+        return $stmt->rowCount();
     }
 
     public function delete($table, $condition, $params = []) {
         $sql = "DELETE FROM $table WHERE $condition";
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $stmt->rowCount();
     }
 }
+
 ?>
