@@ -4,8 +4,6 @@ require_once 'Auth.php';
 require_once 'config.php';
 require_once 'database.php';
 
-
-
 $config = new DatabaseConfig();
 
 

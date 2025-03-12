@@ -30,25 +30,22 @@ try {
 
 try {
   $stmt = $conn->prepare("
-SELECT 
-    o.O_id AS order_id,                      
-    MAX(o.statuse) AS statuse,               
-    MAX(o.note) AS notes,                    
-    MAX(o.date) AS date,                     
-    ANY_VALUE(u.name) AS user_name,          
-    ur.room_number,                           
-    SUM(oc.amount * p.price) AS order_total,  
-    GROUP_CONCAT(CONCAT(oc.amount, ' ', p.name) SEPARATOR ', ') AS products  
-    FROM Orders o
-    JOIN User_Table u ON o.u_id = u.u_id
-    JOIN User_Rooms ur ON u.u_id = ur.u_id  
-    JOIN Order_Contents oc ON o.O_id = oc.o_id
-    JOIN Products p ON oc.P_id = p.P_id
-    GROUP BY o.O_id, ur.room_number   
-    ORDER BY o.O_id DESC
-    LIMIT 5;
-
-
+    SELECT 
+        o.O_id AS order_id,                      
+        MAX(o.statuse) AS statuse,               
+        MAX(o.note) AS notes,                    
+        MAX(o.date) AS date,                     
+        ANY_VALUE(u.name) AS user_name,          
+        o.room_number,  
+        SUM(oc.amount * p.price) AS order_total,  
+        GROUP_CONCAT(CONCAT(oc.amount, ' ', p.name) SEPARATOR ', ') AS products  
+        FROM Orders o
+        JOIN User_Table u ON o.u_id = u.u_id  
+        JOIN Order_Contents oc ON o.O_id = oc.o_id  
+        JOIN Products p ON oc.P_id = p.P_id  
+        GROUP BY o.O_id, o.room_number  
+        ORDER BY o.O_id DESC
+        LIMIT 5;
 
   ");
   $stmt->execute();
@@ -77,16 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die("Database Error: " . $e->getMessage());
     }
 
+
     try {
         $stmt = $conn->prepare("
-            INSERT INTO Orders (u_id, statuse, note)
-            VALUES (:u_id, :statuse, :note)
+            INSERT INTO Orders (u_id, statuse, note, room_number)
+            VALUES (:u_id, :statuse, :note, :room_number)
         ");
         $stmt->execute([
             ':u_id' => $u_id,
             ':statuse' => $statuse,
-            ':note' => $note
+            ':note' => $note,
+            ':room_number' => !empty($room_number) ? $room_number : NULL
         ]);
+    
 
         $order_id = $conn->lastInsertId();
         foreach ($products as $product_id => $quantity) {

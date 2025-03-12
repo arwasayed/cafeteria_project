@@ -64,7 +64,7 @@ CREATE TABLE `Order_Contents` (
 
 LOCK TABLES `Order_Contents` WRITE;
 /*!40000 ALTER TABLE `Order_Contents` DISABLE KEYS */;
-INSERT INTO `Order_Contents` VALUES (12,1,1),(12,2,1),(12,3,1),(12,5,1);
+INSERT INTO `Order_Contents` VALUES (13,1,1),(13,2,1),(13,3,1),(13,5,1),(14,1,1),(14,2,1),(14,3,2),(14,5,1),(15,5,1),(16,2,1),(17,5,1),(18,3,1),(19,3,1),(20,3,1),(21,3,1);
 /*!40000 ALTER TABLE `Order_Contents` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,10 +81,11 @@ CREATE TABLE `Orders` (
   `statuse` enum('done','out of delivery','processing') NOT NULL,
   `note` text,
   `date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `room_number` int NOT NULL,
   PRIMARY KEY (`O_id`,`u_id`),
   KEY `u_id` (`u_id`),
   CONSTRAINT `Orders_ibfk_1` FOREIGN KEY (`u_id`) REFERENCES `User_Table` (`u_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,9 +94,28 @@ CREATE TABLE `Orders` (
 
 LOCK TABLES `Orders` WRITE;
 /*!40000 ALTER TABLE `Orders` DISABLE KEYS */;
-INSERT INTO `Orders` VALUES (12,7,'processing','extra ice','2025-03-12 07:37:28');
+INSERT INTO `Orders` VALUES (13,4,'processing','extra ice','2025-03-12 08:12:53',104),(14,4,'processing','extra icce','2025-03-12 08:30:01',104),(15,4,'processing','','2025-03-12 08:30:32',104),(16,16,'processing','','2025-03-12 08:38:57',22),(17,18,'processing','','2025-03-12 08:39:14',77),(18,4,'processing','','2025-03-12 08:39:36',104),(19,18,'processing','','2025-03-12 08:43:08',77),(20,4,'processing','','2025-03-12 08:43:18',104),(21,4,'processing','','2025-03-12 08:46:20',102);
 /*!40000 ALTER TABLE `Orders` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `before_insert_order` BEFORE INSERT ON `Orders` FOR EACH ROW BEGIN
+    IF NEW.room_number IS NULL THEN
+        SET NEW.room_number = (SELECT room_number FROM User_Rooms WHERE u_id = NEW.u_id LIMIT 1);
+    END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `Products`
@@ -166,7 +186,7 @@ CREATE TABLE `User_Rooms` (
 
 LOCK TABLES `User_Rooms` WRITE;
 /*!40000 ALTER TABLE `User_Rooms` DISABLE KEYS */;
-INSERT INTO `User_Rooms` VALUES (1,101,'1234'),(2,102,'5678'),(3,103,'9876'),(4,104,'5432'),(5,105,'1111'),(7,11,'22'),(8,33,'22'),(9,77,'88'),(10,12,'55'),(11,99,'88'),(12,33,'33'),(13,60,'10'),(14,88,'99');
+INSERT INTO `User_Rooms` VALUES (1,101,'1234'),(2,102,'5678'),(3,103,'9876'),(4,104,'5432'),(5,105,'1111'),(7,11,'22'),(8,33,'22'),(9,77,'88'),(10,12,'55'),(11,99,'88'),(12,33,'33'),(13,60,'10'),(14,88,'99'),(15,77,'99'),(16,22,'33'),(17,22,'123'),(18,77,'991');
 /*!40000 ALTER TABLE `User_Rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -186,7 +206,7 @@ CREATE TABLE `User_Table` (
   `role` enum('admin','user') NOT NULL,
   PRIMARY KEY (`u_id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -195,7 +215,7 @@ CREATE TABLE `User_Table` (
 
 LOCK TABLES `User_Table` WRITE;
 /*!40000 ALTER TABLE `User_Table` DISABLE KEYS */;
-INSERT INTO `User_Table` VALUES (4,'Hager Hussien','hager@yahoo.com','4961','/images/hh.jpg','user'),(6,'admin ','admin@gmail.com','Admin_1234!','/images/admin.jpg','admin'),(7,'ss','ss@gmail.com','$2y$10$vj52AhpY/z37j3oTGVSHxup/3hDw/7e7XfB4Tg7zNYAhVPvt0dqOi','./images/67d0b5a2d0622-L_-ZvmG6.jpeg','user');
+INSERT INTO `User_Table` VALUES (4,'Hager Hussien','hager@yahoo.com','4961','/images/hh.jpg','user'),(6,'admin ','admin@gmail.com','Admin_1234!','/images/admin.jpg','admin'),(16,'arwa','arwa@gmail.com','$2y$10$yx7NyUZKb5HNv/q6K.mOw.7iWi26znH6E7eFuVJELB.8ydoaN0RqS','./images/67d12668d00fd-5 Artistic Photos Of People Made By Artificial Intelligence.jpeg','user'),(18,'mahaa','maha@gmail.com','$2y$10$cy13gTg8.ts1tI3cJMMPAOqUBZD4qDzfD9IrvDgFREiOVc3.fzh7K','./images/67d1299fabc52-ee1c3586-fd15-4907-8dcd-8b25b6a042cf.jpeg','user');
 /*!40000 ALTER TABLE `User_Table` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -299,4 +319,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-12  7:42:42
+-- Dump completed on 2025-03-12  8:47:36
