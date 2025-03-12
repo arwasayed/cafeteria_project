@@ -5,25 +5,22 @@ session_start();
 require_once 'config.php';
 require_once 'database.php';
 
-
 $config = new DatabaseConfig();
-
-
 $db = new Database($config);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    
     $stmt = $db->getConnection()->prepare("SELECT * FROM User_Table WHERE name = :username");
     $stmt->bindParam(':username', $username);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
-        if ($password === $user['password']) { 
-       
+        
+        if (password_verify($password, $user['password'])) {
+            
             $_SESSION['user_id'] = $user['u_id'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['user_name'] = $user['name'];

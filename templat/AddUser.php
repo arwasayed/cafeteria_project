@@ -6,7 +6,6 @@ require_once 'database.php';
 
 $config = new DatabaseConfig();
 
-
 $db = new Database($config);
 $conn = $db->getConnection();
 
