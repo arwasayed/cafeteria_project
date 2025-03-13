@@ -64,7 +64,7 @@ CREATE TABLE `Order_Contents` (
 
 LOCK TABLES `Order_Contents` WRITE;
 /*!40000 ALTER TABLE `Order_Contents` DISABLE KEYS */;
-INSERT INTO `Order_Contents` VALUES (13,1,1),(13,2,1),(13,3,1),(13,5,1),(14,1,1),(14,2,1),(14,3,2),(14,5,1),(15,5,1),(16,2,1),(17,5,1),(18,3,1),(19,3,1),(20,3,1),(21,3,1);
+INSERT INTO `Order_Contents` VALUES (17,5,1),(19,3,1),(24,1,1),(24,2,1);
 /*!40000 ALTER TABLE `Order_Contents` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -85,7 +85,7 @@ CREATE TABLE `Orders` (
   PRIMARY KEY (`O_id`,`u_id`),
   KEY `u_id` (`u_id`),
   CONSTRAINT `Orders_ibfk_1` FOREIGN KEY (`u_id`) REFERENCES `User_Table` (`u_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +94,7 @@ CREATE TABLE `Orders` (
 
 LOCK TABLES `Orders` WRITE;
 /*!40000 ALTER TABLE `Orders` DISABLE KEYS */;
-INSERT INTO `Orders` VALUES (13,4,'processing','extra ice','2025-03-12 08:12:53',104),(14,4,'processing','extra icce','2025-03-12 08:30:01',104),(15,4,'processing','','2025-03-12 08:30:32',104),(16,16,'processing','','2025-03-12 08:38:57',22),(17,18,'processing','','2025-03-12 08:39:14',77),(18,4,'processing','','2025-03-12 08:39:36',104),(19,18,'processing','','2025-03-12 08:43:08',77),(20,4,'processing','','2025-03-12 08:43:18',104),(21,4,'processing','','2025-03-12 08:46:20',102);
+INSERT INTO `Orders` VALUES (17,18,'processing','','2025-03-12 08:39:14',77),(19,18,'processing','','2025-03-12 08:43:08',77),(24,19,'processing','hjdhf','2025-03-12 17:11:49',12);
 /*!40000 ALTER TABLE `Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -125,7 +125,7 @@ DROP TABLE IF EXISTS `Products`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Products` (
-  `P_id` int NOT NULL,
+  `P_id` int NOT NULL AUTO_INCREMENT,
   `c_id` int DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `image_path` varchar(255) DEFAULT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE `Products` (
   KEY `c_id` (`c_id`),
   CONSTRAINT `Products_ibfk_1` FOREIGN KEY (`c_id`) REFERENCES `Category` (`c_id`) ON DELETE CASCADE,
   CONSTRAINT `Products_chk_1` CHECK ((`price` >= 0))
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -144,7 +144,7 @@ CREATE TABLE `Products` (
 
 LOCK TABLES `Products` WRITE;
 /*!40000 ALTER TABLE `Products` DISABLE KEYS */;
-INSERT INTO `Products` VALUES (1,1,'Coffee','/images/coffee.jpg',2.5,'available'),(2,2,'Chips','/images/chips.jpg',1.5,'available'),(3,3,'Cake','/images/cake.jpg',3,'available'),(4,4,'Burger','/images/burger.jpg',5,'not available'),(5,5,'Ice Coffe','/images/salad.jpg',4,'available');
+INSERT INTO `Products` VALUES (1,1,'Coffee','/images/coffee.jpg',2.5,'available'),(2,2,'Chips','/images/chips.jpg',1.5,'available'),(3,3,'Cake','/images/cake.jpg',3,'available'),(4,4,'Burger','/images/burger.jpg',5,'not available'),(5,5,'Ice Coffe','/images/salad.jpg',4,'available'),(6,1,'hjh','1741794357_67d1ac350671e.jpeg',0.04,'available');
 /*!40000 ALTER TABLE `Products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -186,7 +186,7 @@ CREATE TABLE `User_Rooms` (
 
 LOCK TABLES `User_Rooms` WRITE;
 /*!40000 ALTER TABLE `User_Rooms` DISABLE KEYS */;
-INSERT INTO `User_Rooms` VALUES (1,101,'1234'),(2,102,'5678'),(3,103,'9876'),(4,104,'5432'),(5,105,'1111'),(7,11,'22'),(8,33,'22'),(9,77,'88'),(10,12,'55'),(11,99,'88'),(12,33,'33'),(13,60,'10'),(14,88,'99'),(15,77,'99'),(16,22,'33'),(17,22,'123'),(18,77,'991');
+INSERT INTO `User_Rooms` VALUES (1,101,'1234'),(2,102,'5678'),(3,103,'9876'),(4,104,'5432'),(5,105,'1111'),(7,11,'22'),(8,33,'22'),(9,77,'88'),(10,12,'55'),(11,99,'88'),(12,33,'33'),(13,60,'10'),(14,88,'99'),(15,77,'99'),(16,22,'33'),(17,22,'123'),(18,77,'991'),(19,333,'8787'),(20,11,'22');
 /*!40000 ALTER TABLE `User_Rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -206,7 +206,7 @@ CREATE TABLE `User_Table` (
   `role` enum('admin','user') NOT NULL,
   PRIMARY KEY (`u_id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -215,7 +215,7 @@ CREATE TABLE `User_Table` (
 
 LOCK TABLES `User_Table` WRITE;
 /*!40000 ALTER TABLE `User_Table` DISABLE KEYS */;
-INSERT INTO `User_Table` VALUES (4,'Hager Hussien','hager@yahoo.com','4961','/images/hh.jpg','user'),(6,'admin ','admin@gmail.com','Admin_1234!','/images/admin.jpg','admin'),(16,'arwa','arwa@gmail.com','$2y$10$yx7NyUZKb5HNv/q6K.mOw.7iWi26znH6E7eFuVJELB.8ydoaN0RqS','./images/67d12668d00fd-5 Artistic Photos Of People Made By Artificial Intelligence.jpeg','user'),(18,'mahaa','maha@gmail.com','$2y$10$cy13gTg8.ts1tI3cJMMPAOqUBZD4qDzfD9IrvDgFREiOVc3.fzh7K','./images/67d1299fabc52-ee1c3586-fd15-4907-8dcd-8b25b6a042cf.jpeg','user');
+INSERT INTO `User_Table` VALUES (4,'Hager Hussien','hager@yahoo.com','$2y$10$iUHOYF6APyW3NlH7xR.so.AH9wXakKqNMsIk15WsDuh1HB7GRCX5S','/images/hh.jpg','user'),(6,'admin','admin@gmail.com','$2y$10$WwsB8AwTv/R4Nhvufp48p.AHk3x4BKSabmnqh6qfi8V3vkegMZ37K','/images/admin.jpg','admin'),(18,'maha','maha@gmail.com','$2y$10$cy13gTg8.ts1tI3cJMMPAOqUBZD4qDzfD9IrvDgFREiOVc3.fzh7K','./images/67d1299fabc52-ee1c3586-fd15-4907-8dcd-8b25b6a042cf.jpeg','user'),(19,'mariam','mariam@gmail.com','$2y$10$TMpbt3TzCfZFXPCcPMy4uuSU8p6rKsKgZOMCXmIn3mcw34hMaBpcC','./images/67d12f24622c0-c2b0f1fd-1405-4015-b0c7-72154161610f.jpeg','user'),(20,'dd','dd@gmail.com','$2y$10$JdmsPEeOl4O40pFy9YGBNeUuEmhHwHiHpeh04JzR4z283bPBt4CLu','./images/67d1ad6520ab4-megs (@megs_io) on X.jpeg','user');
 /*!40000 ALTER TABLE `User_Table` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -319,4 +319,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-12  8:47:36
+-- Dump completed on 2025-03-13  3:45:31
