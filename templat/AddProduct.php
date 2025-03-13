@@ -1,56 +1,83 @@
-<?php include_once 'header2.php';?>
+<?php 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+include_once 'header2.php';
+include_once 'config.php';
+include_once 'database.php';
+include_once 'business_logic.php';
 
 
+$dbConfig = new DatabaseConfig();
+$db = new Database($dbConfig->getHost(), $dbConfig->getUser(), $dbConfig->getPass(), $dbConfig->getDbName());
+$productObj = new Product($db);
 
 
+$categories = $db->selectAll("Category");
+?>
 
-<h1 class="text-center mb-4">Add New Product</h1>
+<div class="container">
+    <h1 class="text-center mb-4">Add New Product</h1>
 
-<form action="" method="post" class="form1 text-center" >
     
-    <table class="product custom-table text-center" >
-        <tr>
-            <th><label for="product">Product Name</label></th>
-            <td><input type="text" id="product" name="product" class="form-control" placeholder="Enter product name" required></td>
-        </tr>
+    <?php if (isset($_GET['success'])) : ?>
+        <div class="alert alert-success text-center fw-bold" style="font-size: 18px;">
+            <?= htmlspecialchars($_GET['success']) ?>
+        </div>
+    <?php elseif (isset($_GET['error'])) : ?>
+        <div class="alert alert-danger text-center fw-bold" style="font-size: 18px;">
+            <?= htmlspecialchars($_GET['error']) ?>
+        </div>
+    <?php endif; ?>
 
-        <tr>
-            <th><label for="price">Price</label></th>
-            <td>
-                <input type="number" id="price" name="price" class="form-control" step="0.01" required> EGP
-            </td>
-        </tr>
+    <form action="validation.php" method="post" class="form1 text-center" enctype="multipart/form-data">
+        <table class="product custom-table text-center">
+            <tr>
+                <th><label for="product">Product Name</label></th>
+                <td><input type="text" id="product" name="product" class="form-control" placeholder="Enter product name" required></td>
+            </tr>
 
-        <tr>
-            <th><label for="dropdown">Category</label></th>
-            <td>
-                <select id="dropdown" name="category" class="form-select">
-                    <option value="Hot Drink">Hot Drink</option>
-                    <option value="Cold Drinks">Cold Drinks</option>
-                    <option value="Healthy Drinks">Healthy Drinks</option>
-                    <option value="Appetizers">Appetizers</option>
-                    <option value="Fast Food">Fast Food</option>
-                    <option value="Main Dishes">Main Dishes</option>
-                    <option value="Seafood">Seafood</option>
-                    <option value="Healthy Food">Healthy Food</option>
-                </select>
-            </td>
-        </tr>
+            <tr>
+                <th><label for="price">Price</label></th>
+                <td>
+                    <input type="number" id="price" name="price" class="form-control" step="0.01" required> EGP
+                </td>
+            </tr>
 
-        <tr>
-            <th><label for="img">Product Image</label></th>
-            <td><input type="file" id="img" name="img" class="form-control" accept="image/*"></td>
-        </tr>
-        <tr class="button-row">
-            <td colspan="2">
-                <div class="text-center">
-                    <input type="submit" class="btn btn-success px-5" value="Save">
-                    <input type="reset" class="btn btn-primary px-5" value="Reset">
-                </div>
-            </td>
-        </tr>
-    </table>
-</form>
+            <tr>
+                <th><label for="dropdown">Category</label></th>
+                <td>
+                    <select id="dropdown" name="category" class="form-select" required>
+                        <option value="">-- Select Category --</option>
+                        <?php foreach ($categories as $category) : ?>
+                            <option value="<?= htmlspecialchars($category['c_id']) ?>">
+                                <?= htmlspecialchars($category['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
 
+            <tr>
+                <th><label for="img">Product Image</label></th>
+                <td>
+                    <div style="display: flex; align-items: center;">
+                        <input type="file" id="img" name="img" class="form-control file-input" accept="image/*" required style="display: inline-block; width: auto; margin-right: 10px;">
+                    </div>
+                </td>
+            </tr>
+            
+           
+            <tr class="button-row">
+                <td colspan="2">
+                    <div class="text-center mt-4">
+                        <input type="submit" class="btn btn-success text-white px-4 py-2.5 fs-5 rounded-0 d-inline-block mx-2" value="Save">
+                        <input type="reset" class="btn btn-secondary text-white px-4 py-2.5 fs-5 rounded-0 d-inline-block mx-2" value="Reset">
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
 
-<?php include_once 'footer.php';?>
+<?php include_once 'footer.php'; ?>
