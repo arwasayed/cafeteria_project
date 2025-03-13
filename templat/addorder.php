@@ -46,7 +46,7 @@ try {
     die("Database Error: " . $e->getMessage());
 }
 
-// Handle form submission for creating a new order
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $statuse = 'processing'; 
     $note = htmlspecialchars(trim($_POST['notes']));
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $products = $_POST['products'];
 
     try {
-        // Insert the new order into the Orders table
+       
         $stmt = $conn->prepare("
             INSERT INTO Orders (u_id, statuse, note, room_number)
             VALUES (:u_id, :statuse, :note, :room_number)
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ]);
         $order_id = $conn->lastInsertId();
 
-        // Insert the selected products into the Order_Contents table
+       
         foreach ($products as $product_id => $quantity) {
             if ($quantity > 0) {
                 $stmt = $conn->prepare("
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // Redirect back to the same page after saving the order
+       
         header("Location:addorder.php");
         exit();
     } catch (PDOException $e) {
@@ -240,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 totalAmount += parseInt(quantityInput.value) * price;
             });
             totalAmountDisplay.textContent = totalAmount.toFixed(2);
-            totalAmountHidden.value = totalAmount.toFixed(2); // Update hidden input
+            totalAmountHidden.value = totalAmount.toFixed(2); 
         }
     });
     </script>
