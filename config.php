@@ -1,8 +1,8 @@
 <?php
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '123456');
-define('DB_NAME', 'Cafeteria');
+define('DB_PASS', 'root');
+define('DB_NAME', 'cafeteriaProject');
 
 class DatabaseConfig {
     private $host;
