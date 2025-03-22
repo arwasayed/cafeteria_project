@@ -69,21 +69,18 @@ class UserValidation {
     public function validateUserData($name, $email, $room, $ext, $file = null, $checkPassword = false, $password = null, $confirm_password = null) {
         $errors = [];
 
-        
         $errors[] = $this->validateNotEmpty($name, "Name");
         $errors[] = $this->validateNotEmpty($email, "Email");
         $errors[] = $this->validateEmail($email);
         $errors[] = $this->validateNotEmpty($room, "Room number");
         $errors[] = $this->validateNotEmpty($ext, "Ext");
 
-        
         if ($checkPassword) {
             $errors[] = $this->validateNotEmpty($password, "Password");
             $errors[] = $this->validatePasswordStrength($password);
             $errors[] = $this->validatePasswordMatch($password, $confirm_password);
         }
 
-        
         if ($file && $file['error'] == UPLOAD_ERR_OK) {
             $errors[] = $this->validateImage($file, ['jpg', 'jpeg', 'png', 'gif'], 2 * 1024 * 1024);
         }
@@ -95,7 +92,6 @@ class UserValidation {
         try {
             $this->conn->beginTransaction();
 
-            
             $stmt = $this->conn->prepare("
                 INSERT INTO User_Table (name, email, password, image_path, role)
                 VALUES (:name, :email, :password, :image_path, :role)
@@ -110,7 +106,6 @@ class UserValidation {
             ]);
             $user_id = $this->conn->lastInsertId();
 
-            
             $stmt = $this->conn->prepare("
                 INSERT INTO User_Rooms (u_id, room_number, EXT)
                 VALUES (:u_id, :room_number, :ext)
@@ -130,10 +125,13 @@ class UserValidation {
     }
 
     public function updateUser($user_id, $name, $email, $room, $ext, $file_path = null) {
+        if (!$this->isUserExists($user_id)) {
+            return "User does not exist.";
+        }
+
         try {
             $this->conn->beginTransaction();
 
-            
             $stmt = $this->conn->prepare("
                 UPDATE User_Table 
                 SET name = :name, email = :email, image_path = :image_path 
@@ -146,7 +144,6 @@ class UserValidation {
                 ':user_id' => $user_id
             ]);
 
-            
             $stmt = $this->conn->prepare("
                 UPDATE User_Rooms 
                 SET room_number = :room_number, EXT = :ext 
@@ -170,11 +167,9 @@ class UserValidation {
         try {
             $this->conn->beginTransaction();
 
-            
             $stmt = $this->conn->prepare("DELETE FROM User_Rooms WHERE u_id = :user_id");
             $stmt->execute([':user_id' => $user_id]);
 
-            
             $stmt = $this->conn->prepare("DELETE FROM User_Table WHERE u_id = :user_id");
             $stmt->execute([':user_id' => $user_id]);
 
