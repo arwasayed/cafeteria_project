@@ -1,12 +1,7 @@
 <?php
-require_once 'Auth.php';
-require_once 'config.php';
-require_once 'UserValidation.php';
-require_once 'database.php';
+require_once 'businesslogic.php';
 
-$db = new Database(new DatabaseConfig());
-$conn = $db->getConnection();
-$userValidation = new UserValidation($conn);
+$businessLogic = new BusinessLogic();
 $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -16,31 +11,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $confirm_password = htmlspecialchars(trim($_POST['confirm_password']));
     $room = htmlspecialchars(trim($_POST['Room']));
     $ext = htmlspecialchars(trim($_POST['Ext']));
-    $errors = $userValidation->validateUserData($name, $email, $room, $ext, $_FILES['img'], true, $password, $confirm_password);
-    if (empty($errors)) {
-        
-        $upload_dir = './images/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
+    $file = $_FILES['img'];
 
-        $file_path = $userValidation->uploadImage($_FILES['img'], $upload_dir);
-
-        if ($file_path) {
-            
-            $result = $userValidation->addUser($name, $email, $password, $room, $ext, $file_path);
-
-            if ($result === true) {
-                header("Location: Users.php");
-                exit();
-            } else {
-                $error = $result;
-            }
-        } else {
-            $error = "Failed to upload profile picture.";
-        }
+    $result = $businessLogic->addUser($name, $email, $password, $room, $ext, $file);
+    if ($result === true) {
+        header("Location: Users.php");
+        exit();
     } else {
-        $error = implode("<br>", $errors);
+        $error = $result;
     }
 }
 ?>
@@ -130,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </form>
 
     <?php if (isset($error)): ?>
-        <p class="error"><?php echo $error; ?></p>
+        <p class="error"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
 
     <?php include_once 'footer.php'; ?>
