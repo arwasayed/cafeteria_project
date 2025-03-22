@@ -1,4 +1,7 @@
+
 <?php
+require_once 'database.php';
+
 class Product {
     private $db;
 
@@ -7,10 +10,9 @@ class Product {
     }
 
     public function insert($name, $price, $category_id, $image_path) {
-        $available = 'available';
         return $this->db->insert("Products", 
             ["name", "price", "c_id", "image_path", "available"], 
-            [$name, $price, $category_id, $image_path, $available]);
+            [$name, $price, $category_id, $image_path, 'available']);
     }
 
     public function getAllCategories() {
@@ -18,38 +20,25 @@ class Product {
     }
 
     public function getAll() {
-        return $this->db->select(
-            "Products",
-            ["P_id", "name", "price", "image_path"] 
-        );
+        return $this->db->select("Products", ["P_id", "name", "price", "image_path"]);
     }
-    
 
     public function getById($id) {
-        $sql = "SELECT name, price, image_path FROM Products WHERE P_id = ?";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetch();
-    }
-
-    public function update($id, $name, $price, $image_path) {
-        $sql = "UPDATE Products SET name = ?, price = ?, image_path = ? WHERE P_id = ?";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        return $stmt->execute([$name, $price, $image_path, $id]);
+        $result = $this->db->select("Products", ["name", "price", "image_path"], "P_id = ?", [$id]);
+        return $result ? $result[0] : null;
     }
     
-
+    public function update($id, $name, $price, $image_path) {
+        return $this->db->update("Products", ["name", "price", "image_path"], [$name, $price, $image_path, $id], "P_id = ?");
+    }
+    
     public function delete($productId) {
         try {
-            // تأكد من حذف الطلبات المرتبطة بالمنتج أولًا
-            $this->db->delete('order_contents', 'P_id = ?', [$productId]);
-    
-            // الآن احذف المنتج من جدول products
-            return $this->db->delete('products', 'P_id = ?', [$productId]);
+            $this->db->delete("order_contents", "P_id = ?", [$productId]);
+            return $this->db->delete("Products", "P_id = ?", [$productId]); 
         } catch (PDOException $e) {
             return false;
         }
     }
-    
 }
 ?>
