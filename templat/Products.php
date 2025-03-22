@@ -7,8 +7,9 @@ include_once 'config.php';
 include_once 'database.php'; 
 include_once 'business_logic.php';  
 
-$db = new Database(new DatabaseConfig());
-$productObj = new Product($db);
+$dbConfig = new DatabaseConfig();
+$db = new Database($dbConfig);
+$productObj  = new Product($db);
 $products = $productObj->getAll();
 ?>
 <!DOCTYPE html>
