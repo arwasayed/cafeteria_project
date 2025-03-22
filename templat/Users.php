@@ -1,35 +1,8 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-require_once 'Auth.php';
-require_once 'config.php';
-require_once 'database.php';
+require_once 'businesslogic.php';
 
-$config = new DatabaseConfig();
-
-
-$db = new Database($config);
-$conn = $db->getConnection();
-
-try {
-    
-    $stmt = $conn->prepare("
-        SELECT u.u_id, u.name, u.email, u.image_path, u.role, 
-               GROUP_CONCAT(ur.room_number SEPARATOR ', ') AS rooms, ur.EXT
-        FROM User_Table u
-        LEFT JOIN User_Rooms ur ON u.u_id = ur.u_id
-        WHERE u.role != 'admin'  
-        GROUP BY u.u_id, u.name, u.email, u.image_path, u.role, ur.EXT
-        ORDER BY u.u_id DESC
-    ");
-    $stmt->execute();
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
-}
-
-
-$base_path = './images/';
+$businessLogic = new BusinessLogic();
+$users = $businessLogic->getAllUsers();
 ?>
 
 <!DOCTYPE html>
@@ -187,6 +160,5 @@ $base_path = './images/';
     </div>
 
     <?php include_once 'footer.php'; ?>
-
 </body>
 </html>
