@@ -150,13 +150,13 @@ $products = $productObj->getAll();
                                 <?php endif; ?>
                             </div>
                     <div class='table-data' style='display: flex; gap: 5px; justify-content: center;'>
-                        <!-- Update Link -->
+                        
                         <a href="update_product.php?P_id=<?= isset($product['P_id']) ? htmlspecialchars($product['P_id']) : '' ?>"
                            class="btn btn-primary" style="border-radius: 20px; padding: 5px 10px; font-size: 14px; text-decoration: none; color: white;">
                             Update
                         </a>
 
-                        <!-- Delete Link -->
+                      
                         <a href="deleted_product.php?P_id=<?= isset($product['P_id']) ? htmlspecialchars($product['P_id']) : '' ?>"
                            class="btn btn-danger" 
                            onclick="return confirm('Are you sure you want to delete this product?');"
