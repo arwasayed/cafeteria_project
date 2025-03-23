@@ -31,8 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $room = htmlspecialchars(trim($_POST['Room']));
     $ext = htmlspecialchars(trim($_POST['Ext']));
     $file = $_FILES['img'];
+    $current_image = $_POST['current_image']; 
 
-    $result = $businessLogic->updateUser($user_id, $name, $email, $room, $ext, $file);
+    $result = $businessLogic->updateUser($user_id, $name, $email, $room, $ext, $file, $current_image);
     if ($result === true) {
         header("Location: Users.php");
         exit();
@@ -94,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <th><label for="img">Profile Picture</label></th>
                 <td>
                     <input type="file" id="img" name="img" class="form-control" accept="image/*">
+                    <input type="hidden" name="current_image" value="<?php echo htmlspecialchars($user['image_path']); ?>">
                     <?php if ($user['image_path']): ?>
                         <img src="<?php echo htmlspecialchars($user['image_path']); ?>" alt="Current Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-top: 10px;">
                     <?php endif; ?>
