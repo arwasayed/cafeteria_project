@@ -2,75 +2,40 @@
 session_start();
 require_once 'config.php';
 require_once 'database.php';
+require_once 'MyOrdersBusinessLogic.php';
 
-// Ensure the user is logged in
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
 }
 
-$userId = $_SESSION['user_id'];
-
-// Initialize database connection
 $config = new DatabaseConfig();
 $db = new Database($config);
-$conn = $db->getConnection();
 
-try {
-    // Fetch user details
-    $stmt = $conn->prepare("SELECT name FROM User_Table WHERE u_id = :u_id");
-    $stmt->execute([':u_id' => $userId]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+$orderObj = new Order($db);
+$userObj = new User($db);
 
-    if (!$user) {
-        die("Error: User not found.");
-    }
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
+$userId = $_SESSION['user_id'];
+$user = $userObj->getUserById($userId);
+
+if (!$user) {
+    die("Error: User not found.");
 }
 
-// Default filter values
-$dateFrom = isset($_GET['dateFrom']) ? $_GET['dateFrom'] : '';
-$dateTo = isset($_GET['dateTo']) ? $_GET['dateTo'] : '';
 
-// Build the base query
-$query = "
-    SELECT 
-        o.O_id AS order_id,
-        o.date AS order_date,
-        o.statuse AS status,
-        SUM(oc.amount * p.price) AS total_price,
-        GROUP_CONCAT(DISTINCT CONCAT(oc.amount, ' x ', p.name) SEPARATOR ', ') AS products
-    FROM Orders o
-    JOIN Order_Contents oc ON o.O_id = oc.o_id  
-    JOIN Products p ON oc.P_id = p.P_id  
-    WHERE o.u_id = :u_id
-";
+$dateFrom = $_GET['dateFrom'] ?? '';
+$dateTo = $_GET['dateTo'] ?? '';
+$errors = [];
 
-$params = [':u_id' => $userId];
 
-// Add date filters if provided
-if (!empty($dateFrom)) {
-    $query .= " AND o.date >= :dateFrom";
-    $params[':dateFrom'] = $dateFrom . ' 00:00:00';
-}
-if (!empty($dateTo)) {
-    $query .= " AND o.date <= :dateTo";
-    $params[':dateTo'] = $dateTo . ' 23:59:59';
+if (!empty($dateFrom) && !empty($dateTo) && $dateFrom > $dateTo) {
+    $errors[] = "The 'Date from' cannot be later than 'Date to'.";
 }
 
-$query .= " GROUP BY o.O_id ORDER BY o.date DESC";
 
-try {
-    $stmt = $conn->prepare($query);
-    foreach ($params as $key => &$value) {
-        $stmt->bindParam($key, $value);
-    }
-    $stmt->execute();
-    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
-}
+$orders = empty($errors) ? $orderObj->getOrders($userId, $dateFrom, $dateTo) : [];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -78,7 +43,6 @@ try {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>My Orders</title>
-    <link rel="stylesheet" href="path_to_your_styles.css">
 </head>
 <style>
 .my_orders_section {
@@ -124,7 +88,7 @@ try {
 <body>
     <?php include_once 'userheader2.php'; ?>
 
-    <!-- My Orders Section -->
+
     <section class="my_orders_section layout_padding">
         <div class="container">
             <div class="row">
@@ -133,7 +97,7 @@ try {
                 </div>
             </div>
 
-            <!-- Date Filters -->
+            
             <form method="GET">
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -154,7 +118,7 @@ try {
                 </div>
             </form>
 
-            <!-- Orders Table -->
+            
             <div class="row">
                 <div class="col-md-12">
                     <table class="table table-striped">
@@ -240,7 +204,7 @@ try {
             });
         });
 
-        // Handle cancel order button
+        
         const cancelButtons = document.querySelectorAll('.cancel-order');
         cancelButtons.forEach(function (button) {
             button.addEventListener('click', function () {
