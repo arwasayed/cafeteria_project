@@ -2,9 +2,9 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-require_once 'config.php';
-require_once 'database.php';
-$db = new Database(new DatabaseConfig());
+
+require_once 'indexValidation.php';
+require_once 'indexLogic.php';
 
 $error_message = "";
 
@@ -12,14 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $useremail = trim($_POST['Email']);
     $password = trim($_POST['passwd']);
 
-    $stmt = $db->getConnection()->prepare("SELECT * FROM User_Table WHERE email = :useremail");
-    $stmt->bindParam(':useremail', $useremail);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Validate input
+    if (!InputValidator::validateEmail($useremail)) {
+        $error_message = "Invalid email format.";
+    } elseif (!InputValidator::validatePassword($password)) {
+        $error_message = "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.";
+    } else {
+        // Authenticate user
+        $authLogic = new AuthLogic();
+        $user = $authLogic->authenticateUser($useremail, $password);
 
-    if ($user) {
-        // Verify the password using password_verify
-        if (password_verify($password, $user['password'])) {
+        if ($user) {
             $_SESSION['user_id'] = $user['u_id'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['user_name'] = $user['name'];
@@ -32,16 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             exit();
         } else {
-            $error_message = "Invalid username or password";
+            $error_message = "Invalid username or password.";
         }
-    } else {
-        $error_message = "Invalid username or password";
     }
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="./css/log_in.css" />
 </head>
-
 <body>
     <div class="container">
         <?php if (isset($error_message)): ?>
@@ -110,5 +109,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     </script>
 </body>
-
 </html>
