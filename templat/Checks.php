@@ -1,84 +1,62 @@
 <?php
-require_once 'Auth.php';
-require_once 'config.php';
 require_once 'database.php';
+require_once 'checksBusinessLogic.php';
+require_once 'Auth.php';
 
-// Initialize database connection
+
 $config = new DatabaseConfig();
 $db = new Database($config);
-$conn = $db->getConnection();
 
-try {
-    // Fetch users (excluding admin)
-    $stmt = $conn->prepare("SELECT u_id, name FROM User_Table WHERE role != 'admin'");
-    $stmt->execute();
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
-}
+$order = new Order($db);
+$user = new User($db);
+$product = new Product($db);
 
-try {
-    // Fetch available products
-    $stmt = $conn->prepare("SELECT P_id, name, price FROM Products WHERE available = 'available'");
-    $stmt->execute();
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
-}
+$errors = [];
+$dateFrom = $_GET['dateFrom'] ?? '';
+$dateTo = $_GET['dateTo'] ?? '';
+$userSelect = $_GET['userSelect'] ?? '';
 
-// Default filter values
-$dateFrom = isset($_GET['dateFrom']) ? $_GET['dateFrom'] : '';
-$dateTo = isset($_GET['dateTo']) ? $_GET['dateTo'] : '';
-$userSelect = isset($_GET['userSelect']) ? intval($_GET['userSelect']) : '';
 
-// Build the base query
-$query = "
-    SELECT 
-        o.O_id AS order_id,                      
-        MAX(o.statuse) AS statuse,               
-        MAX(o.note) AS notes,                    
-        MAX(o.date) AS date,                     
-        u.name AS user_name,          
-        o.room_number,  
-        SUM(oc.amount * p.price) AS order_total,  
-        GROUP_CONCAT(CONCAT(oc.amount, ' x ', p.name) SEPARATOR ', ') AS products  
-    FROM Orders o
-    JOIN User_Table u ON o.u_id = u.u_id  
-    JOIN Order_Contents oc ON o.O_id = oc.o_id  
-    JOIN Products p ON oc.P_id = p.P_id  
-    WHERE 1=1
-";
-
-$params = [];
-
-// Add date filters if provided
-if (!empty($dateFrom)) {
-    $query .= " AND o.date >= :dateFrom";
-    $params[':dateFrom'] = $dateFrom . ' 00:00:00';
-}
-if (!empty($dateTo)) {
-    $query .= " AND o.date <= :dateTo";
-    $params[':dateTo'] = $dateTo . ' 23:59:59';
-}
-
-// Add user filter if provided
-if (!empty($userSelect)) {
-    $query .= " AND u.u_id = :u_id";
-    $params[':u_id'] = $userSelect;
-}
-
-$query .= " GROUP BY o.O_id, o.room_number, u.name ORDER BY o.O_id DESC";
-
-try {
-    $stmt = $conn->prepare($query);
-    foreach ($params as $key => &$value) {
-        $stmt->bindParam($key, $value);
+if (!empty($dateFrom) && !empty($dateTo)) {
+    if ($dateFrom > $dateTo) {
+        $errors[] = "The 'Date from' cannot be later than 'Date to'.";
     }
-    $stmt->execute();
-    $filteredOrders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
 }
+
+
+$userIds = array_column($user->getUsers(), 'u_id'); 
+if (!empty($userSelect) && !in_array($userSelect, $userIds)) {
+    $errors[] = "Invalid user selected.";
+}
+
+
+$filteredOrders = empty($errors) ? $order->getOrders($dateFrom, $dateTo, $userSelect) : [];
+
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
+    $orderId = intval($_POST['order_id']);
+    $action = $_POST['action'];
+
+    
+    $validOrderIds = array_column($order->getOrders(), 'order_id');
+    if (!in_array($orderId, $validOrderIds)) {
+        $errors[] = "Invalid order ID.";
+    } else {
+        
+        if ($action === 'approve') {
+            $order->updateOrderStatus($orderId, 'Approved');
+        } elseif ($action === 'reject') {
+            $order->updateOrderStatus($orderId, 'Rejected');
+        }
+        header("Location: index.php");
+        exit();
+    }
+}
+
+
+$users = $user->getUsers();
+$products = $product->getAvailableProducts();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -86,7 +64,6 @@ try {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Manual Order</title>
-    <link rel="stylesheet" href="path_to_your_styles.css">
 </head>
 <style>
 .latest_order {
@@ -140,7 +117,7 @@ try {
         <div class="container">
             <h2 class="section_heading">Manual Order</h2>
 
-            <!-- Filters -->
+            
             <form id="filterForm" method="GET">
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -168,7 +145,7 @@ try {
                 <button type="submit" class="btn btn-primary">Apply Filters</button>
             </form>
 
-            <!-- Filtered Orders Table -->
+            
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
@@ -212,7 +189,7 @@ try {
         const dateToInput = document.getElementById('dateTo');
         const userSelect = document.getElementById('userSelect');
 
-        // Automatically submit the form when filters change
+        
         dateFromInput.addEventListener('change', function() {
             document.getElementById('filterForm').submit();
         });
