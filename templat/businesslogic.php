@@ -73,7 +73,7 @@ class BusinessLogic {
         }
     }
 
-    public function updateUser($user_id, $name, $email, $room, $ext, $file = null) {
+    public function updateUser($user_id, $name, $email, $room, $ext, $file = null, $current_image = null) {
         if (!$this->isUserExists($user_id)) {
             return "User does not exist.";
         }
@@ -83,7 +83,7 @@ class BusinessLogic {
             return implode("<br>", $errors);
         }
 
-        $file_path = null;
+        $file_path = $current_image; 
         if ($file && $file['error'] == UPLOAD_ERR_OK) {
             $upload_dir = './images/';
             if (!is_dir($upload_dir)) {
