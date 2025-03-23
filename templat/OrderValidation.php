@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-require_once 'database.php';
+require_once 'Database.php';
 
 class OrderValidation {
     private $conn;

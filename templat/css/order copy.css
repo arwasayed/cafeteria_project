@@ -1,0 +1,91 @@
+.add_order_section {
+    padding: 60px 0;
+  }
+  
+  .section_heading {
+    font-size: 2em;
+    margin-bottom: 30px;
+  }
+  
+  .order_items .item {
+    margin-bottom: 10px;
+  }
+  
+  .order_items .item label {
+    display: inline-block;
+    width: 100px;
+  }
+  
+  .order_items .item .quantity {
+    width: 50px;
+    text-align: center;
+  }
+  
+  .order_items .item .price {
+    margin-left: 10px;
+  }
+  
+  .notes textarea {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 10px;
+  }
+  
+  .room select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .total {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+  }
+  
+  .latest_order {
+    border: 1px solid #ccc;
+    padding: 20px;
+  }
+  
+  .latest_order .items {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .latest_order .items .item {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #f0f0f0;
+    text-align: center;
+    line-height: 50px;
+  }
+  .latest_order {
+    border: 1px solid #ccc;
+    padding: 20px;
+  }
+  
+  .latest_order .items {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap to the next line if they don't fit */
+    gap: 10px; /* Add some space between items */
+  }
+  
+  .latest_order .item {
+    flex: 1 1 calc(50% - 10px); /* Each item takes up 50% width minus the gap */
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+.checks_section {
+  padding: 60px 0;
+}
+
+.table-responsive {
+  margin-bottom: 30px;
+}
+
+.orders, .order-details {
+  margin-top: 10px;
+}
