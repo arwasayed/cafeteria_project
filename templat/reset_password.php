@@ -1,23 +1,22 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 session_start();
 require_once 'config.php';
 require_once 'database.php';
+require_once 'resetpasswordblogic.php';
+require_once 'resetpasswordvalidation.php';
 
-$db = new Database(new DatabaseConfig());
 $error_message = "";
 $success_message = "";
+
+// Initialize business logic class
+$resetPasswordLogic = new ResetPasswordLogic();
 
 if (!isset($_GET['token'])) {
     die("Invalid reset link.");
 }
 
 $reset_token = $_GET['token'];
-$stmt = $db->getConnection()->prepare("SELECT * FROM User_Table WHERE reset_token = :token AND reset_token_expiry > NOW()");
-$stmt->bindParam(':token', $reset_token);
-$stmt->execute();
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$user = $resetPasswordLogic->validateResetToken($reset_token);
 
 if (!$user) {
     die("Invalid or expired reset link.");
@@ -27,16 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_password = trim($_POST['new_password']);
     $confirm_password = trim($_POST['confirm_password']);
 
-    if ($new_password !== $confirm_password) {
-        $error_message = "Passwords do not match.";
+    // Validate passwords
+    $validationError = ResetPasswordValidation::validatePasswords($new_password, $confirm_password);
+    if ($validationError) {
+        $error_message = $validationError;
     } else {
-        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-        $stmt = $db->getConnection()->prepare("UPDATE User_Table SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = :token");
-        $stmt->bindParam(':password', $hashed_password);
-        $stmt->bindParam(':token', $reset_token);
-        $stmt->execute();
-
-        $success_message = "Your password has been reset successfully.";
+        // Reset password in the database
+        if ($resetPasswordLogic->resetPassword($reset_token, $new_password)) {
+            $success_message = "Your password has been reset successfully.";
+        } else {
+            $error_message = "An error occurred while resetting your password. Please try again.";
+        }
     }
 }
 ?>
@@ -84,13 +84,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         document.getElementById("resetPasswordForm").addEventListener("submit", function(event) {
             const newPassword = document.getElementById("new_password").value;
             const confirmPassword = document.getElementById("confirm_password").value;
+
+            // Check if passwords match
             if (newPassword !== confirmPassword) {
                 document.getElementById("confirm_password").classList.add("is-invalid");
                 event.preventDefault();
                 return;
             }
 
-            // Optional: Add password strength validation
+            // Optional: Add client-side password strength validation
             const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
             if (!passwordRegex.test(newPassword)) {
                 document.getElementById("new_password").classList.add("is-invalid");
