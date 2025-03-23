@@ -1,10 +1,10 @@
 <?php
-require_once 'config.php';
-require_once 'database.php';
-require_once 'Auth.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+require_once 'businesslogic.php';
+include_once 'header2.php';
 
-$db = new Database(new DatabaseConfig());
-$conn = $db->getConnection();
+$businessLogic = new BusinessLogic();
 
 if (!isset($_GET['id'])) {
     header("Location: Users.php");
@@ -12,24 +12,15 @@ if (!isset($_GET['id'])) {
 }
 $user_id = intval($_GET['id']);
 
-try {
-    $stmt = $conn->prepare("
-        SELECT u.u_id, u.name, u.email, u.image_path, u.role, 
-               GROUP_CONCAT(ur.room_number SEPARATOR ', ') AS rooms, ur.EXT
-        FROM User_Table u
-        LEFT JOIN User_Rooms ur ON u.u_id = ur.u_id
-        WHERE u.u_id = :user_id
-        GROUP BY u.u_id, u.name, u.email, u.image_path, u.role, ur.EXT
-    ");
-    $stmt->execute([':user_id' => $user_id]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$businessLogic->isUserExists($user_id)) {
+    die("User does not exist.");
+}
 
-    if (!$user) {
-        header("Location: Users.php");
-        exit();
-    }
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
+$user = $businessLogic->getUserById($user_id);
+
+if (!$user) {
+    header("Location: Users.php");
+    exit();
 }
 
 $error = "";
@@ -39,63 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = htmlspecialchars(trim($_POST['email']));
     $room = htmlspecialchars(trim($_POST['Room']));
     $ext = htmlspecialchars(trim($_POST['Ext']));
+    $file = $_FILES['img'];
 
-    // Handle file upload
-    $file_path = $user['image_path']; // Default to the existing image path
-    if (isset($_FILES['img']) && $_FILES['img']['error'] == UPLOAD_ERR_OK) {
-        $upload_dir = './images/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-
-        $file_extension = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-        $file_name = uniqid("user_", true) . "." . $file_extension;
-        $file_path = $upload_dir . $file_name;
-
-        if (!move_uploaded_file($_FILES['img']['tmp_name'], $file_path)) {
-            $error = "Failed to upload profile picture.";
-        }
-    }
-
-    if (!$error) {
-        try {
-            $conn->beginTransaction();
-
-            // Update user details in User_Table
-            $stmt = $conn->prepare("
-                UPDATE User_Table 
-                SET name = :name, email = :email, image_path = :image_path 
-                WHERE u_id = :user_id
-            ");
-            $stmt->execute([
-                ':name' => $name,
-                ':email' => $email,
-                ':image_path' => $file_path, // Use $file_path here
-                ':user_id' => $user_id
-            ]);
-
-            // Update user room details in User_Rooms
-            $stmt = $conn->prepare("
-                UPDATE User_Rooms 
-                SET room_number = :room_number, EXT = :ext 
-                WHERE u_id = :user_id
-            ");
-            $stmt->execute([
-                ':room_number' => $room,
-                ':ext' => $ext,
-                ':user_id' => $user_id
-            ]);
-
-            $conn->commit();
-            header("Location: Users.php");
-            exit();
-        } catch (PDOException $e) {
-            $conn->rollBack();
-            $error = "Error updating user: " . $e->getMessage();
-        }
+    $result = $businessLogic->updateUser($user_id, $name, $email, $room, $ext, $file);
+    if ($result === true) {
+        header("Location: Users.php");
+        exit();
+    } else {
+        $error = $result;
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Edit User</title>
 </head>
 <body>
-    <?php include_once 'header2.php'; ?>
 
     <h1 class="text-center mb-4">Edit User</h1>
 
@@ -167,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </form>
 
     <?php if (isset($error)): ?>
-        <p class="error"><?php echo $error; ?></p>
+        <p class="error"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
 
     <?php include_once 'footer.php'; ?>

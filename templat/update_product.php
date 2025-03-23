@@ -1,3 +1,4 @@
+
 <?php
 ob_start();
 ini_set('display_errors', 1);
@@ -29,7 +30,7 @@ if (!$product) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
     $name = $_POST['name'] ?? '';
     $price = $_POST['price'] ?? '';
-    $imagePath = $product['image_path']; 
+    $imagePath = $product['image_path'];
 
     if (empty($name) || empty($price)) {
         header("Location: update_product.php?P_id=$productId&error=Please fill in all required fields.");
@@ -42,16 +43,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
         $targetFilePath = $targetDir . $imageName;
 
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFilePath)) {
-            $imagePath = $targetFilePath; 
+            $imagePath = $targetFilePath;
         } else {
             die("Error uploading file: " . $_FILES['image']['error']);
         }
     }
 
-    $updated = $productObj->update($productId, $name, $price, $imagePath);
+    $updated = $productObj->update($productId, $name, $price, $imagePath, $product['c_id'], $product['available']);
 
     if ($updated) {
-        header("Location:Products.php");
+        header("Location: Products.php");
         exit();
     } else {
         header("Location: update_product.php?P_id=$productId&error=Failed to update product. Please try again.");
@@ -94,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                     <input type="file" id="image" name="image" class="form-control">
                     <br>
                     <?php if (!empty($product['image_path'])): ?>
-                        <img src="images/<?= htmlspecialchars($product['image_path']) ?>" alt="Product Image" width="100">
+                        <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="Product Image" width="100">
                     <?php else: ?>
                         <img src="images/default.png" alt="Default" width="100">
                     <?php endif; ?>
@@ -105,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                 <td colspan="2">
                     <div class="text-center mt-4">
                         <button type="submit" name="update" class="btn btn-primary px-4 py-2.5 fs-5 rounded-0 d-inline-block">Update</button>
-                    </div>
+</div>
                 </td>
             </tr>
         </table>

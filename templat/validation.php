@@ -1,3 +1,4 @@
+
 <?php
 
 error_reporting(E_ALL);
@@ -5,30 +6,30 @@ ini_set('display_errors', 1);
 
 include 'config.php';
 include 'database.php';
+include 'business_logic.php';
 
-
-$db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-$pdo = $db->getConnection();
+$dbConfig = new DatabaseConfig();
+$db = new Database($dbConfig);
+$productObj  = new Product($db);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $product = trim($_POST['product']);
     $price = trim($_POST['price']);
     $category = trim($_POST['category']);
     $image_path = null;
-
     $errors = [];
 
- 
+   
     if (empty($product) || empty($price) || empty($category)) {
         $errors[] = "All fields are required!";
     }
 
-    
+   
     if (!is_numeric($price) || $price <= 0) {
         $errors[] = "Invalid price! It must be a positive number.";
     }
 
-   
+    
     if (isset($_FILES['img']) && $_FILES['img']['error'] === 0) {
         $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
         $file_ext = strtolower(pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION));
@@ -37,7 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors[] = "Invalid file type! Only JPG, PNG, and GIF are allowed.";
         }
 
-      
         if ($_FILES['img']['size'] > 2 * 1024 * 1024) {
             $errors[] = "File size must be less than 2MB!";
         }
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Product image is required!";
     }
 
-   
+
     if (!empty($errors)) {
         foreach ($errors as $error) {
             echo "<p style='color:red;'>$error</p>";
@@ -53,18 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    
-    //if (isset($_FILES['img']) && $_FILES['img']['error'] == UPLOAD_ERR_OK) {
-        
-
-        
-        
-
-        
-
-
-
-    
+  
     $upload_dir = './images/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
@@ -79,24 +68,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-   
-    $stmt = $pdo->prepare("INSERT INTO Products (name, price, c_id, image_path, available) VALUES (?, ?, ?, ?, ?)");
-    $available = 'available';
-
+    
     try {
-        if ($stmt->execute([$product, $price, $category, $image_path, $available])) {
-            if ($stmt->rowCount() > 0) {
-                header("Location: AddProduct.php?success=" . urlencode("Product added successfully!"));
-            } else {
-                header("Location: AddProduct.php?error=" . urlencode("No rows were inserted!"));
-            }
+        $inserted = $productObj->insert($product, $price, $category, $image_path);
+        
+        if ($inserted) {
+            header("Location: AddProduct.php?success=" . urlencode("Product added successfully!"));
         } else {
-            header("Location: AddProduct.php?error=" . urlencode("Error inserting data!"));
+            header("Location: AddProduct.php?error=" . urlencode("No rows were inserted!"));
         }
     } catch (PDOException $e) {
         header("Location: AddProduct.php?error=" . urlencode("Error inserting data: " . $e->getMessage()));
     }
-
+    
     exit();
 }
 ?>
